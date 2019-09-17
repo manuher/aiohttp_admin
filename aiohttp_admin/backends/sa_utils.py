@@ -5,6 +5,9 @@ import trafaret as t
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import or_
 from trafaret.contrib.rfc_3339 import DateTime
+from geoalchemy2.types import Geometry
+import shapely.wkb
+
 
 from ..exceptions import JsonValidaitonError
 from ..utils import MULTI_FIELD_TEXT_QUERY, as_dict
@@ -14,6 +17,22 @@ __all__ = ['table_to_trafaret', 'create_filter']
 
 
 AnyDict = t.Dict({}).allow_extra('*')
+
+
+class TrafaretGeometry(t.Trafaret):
+
+    def __repr__(self):
+        return "<Geometry>"
+
+    def check_and_return(self, value):
+        if isinstance(value, Geometry):
+            return value
+        try:
+            geo_bytes = bytes.fromhex(value)
+            shapely.wkb.loads(geo_bytes)
+            return value
+        except Exception as e:
+            self._failure(str(e))
 
 
 def build_trafaret(sa_type, **kwargs):
@@ -51,6 +70,9 @@ def build_trafaret(sa_type, **kwargs):
     elif isinstance(sa_type, postgresql.ARRAY):
         item_trafaret = build_trafaret(sa_type.item_type)
         trafaret = t.List(item_trafaret)
+
+    elif isinstance(sa_type, Geometry):
+        trafaret = TrafaretGeometry
 
     else:
         type_ = str(sa_type)
