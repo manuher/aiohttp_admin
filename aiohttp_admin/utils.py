@@ -4,6 +4,7 @@ from collections import namedtuple
 from datetime import datetime, date
 from functools import partial
 from types import MappingProxyType
+from geoalchemy2.elements import WKBElement
 
 import trafaret as t
 from aiohttp import web
@@ -31,6 +32,9 @@ def json_datetime_serial(obj):
     if isinstance(obj, (datetime, date)):
         serial = obj.isoformat()
         return serial
+
+    if isinstance(obj, WKBElement):
+        return obj.desc
 
     if ObjectId is not None and isinstance(obj, ObjectId):
         # TODO: try to use bson.json_util instead
