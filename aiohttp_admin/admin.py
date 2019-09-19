@@ -41,7 +41,8 @@ class AdminHandler:
 
     async def index_page(self, request):
         t = self._template
-        context = {'name': self._name}
+        context = {'name': self._name,
+                   'request': request}
         return render_template(t, request, context, app_key=TEMPLATE_APP_KEY)
 
     async def login_page(self, request):
