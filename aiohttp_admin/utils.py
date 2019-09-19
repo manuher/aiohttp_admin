@@ -75,7 +75,7 @@ ListQuery = t.Dict({
     OptKey('_sortDir', default=DESC): t.Enum(DESC, ASC),
 
     OptKey('_filters'): t.Mapping(t.String, Filter | SimpleType)
-})
+}).ignore_extra('*')
 
 LoginForm = t.Dict({
     "username": t.String,
